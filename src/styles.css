@@ -5,8 +5,8 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
-  --font-sans: "Chakra Petch", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  --font-sans: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -38,44 +38,86 @@
 
 :root {
   --radius: 0.375rem;
-  --background: oklch(0.13 0.015 160);
-  --foreground: oklch(0.93 0.03 150);
-  --card: oklch(0.17 0.02 160);
-  --card-foreground: oklch(0.93 0.03 150);
-  --popover: oklch(0.16 0.02 160);
-  --popover-foreground: oklch(0.93 0.03 150);
-  --primary: oklch(0.87 0.24 148);
-  --primary-foreground: oklch(0.15 0.03 150);
-  --secondary: oklch(0.22 0.025 160);
-  --secondary-foreground: oklch(0.9 0.03 150);
-  --muted: oklch(0.2 0.02 160);
-  --muted-foreground: oklch(0.62 0.04 155);
-  --accent: oklch(0.24 0.04 160);
-  --accent-foreground: oklch(0.93 0.03 150);
-  --destructive: oklch(0.65 0.24 18);
-  --destructive-foreground: oklch(0.97 0.01 20);
-  --info: oklch(0.85 0.14 200);
-  --info-foreground: oklch(0.15 0.03 200);
-  --warning: oklch(0.83 0.17 80);
-  --warning-foreground: oklch(0.18 0.04 80);
-  --border: oklch(0.28 0.035 160);
-  --input: oklch(0.28 0.035 160);
-  --ring: oklch(0.87 0.24 148);
-  --glow-primary: 0 0 24px color-mix(in oklab, var(--primary) 45%, transparent);
-  --glow-destructive: 0 0 24px color-mix(in oklab, var(--destructive) 50%, transparent);
+
+  /* Universal Hex Fallbacks for Android 7+ (Nougat / Chrome 53+) */
+  --background: #0a0f0d;
+  --foreground: #e0f2e9;
+  --card: #0f1713;
+  --card-foreground: #e0f2e9;
+  --popover: #0f1713;
+  --popover-foreground: #e0f2e9;
+  --primary: #00ff66;
+  --primary-foreground: #05140a;
+  --secondary: #13201a;
+  --secondary-foreground: #d0e8dc;
+  --muted: #16241e;
+  --muted-foreground: #8aa89b;
+  --accent: #1a2e24;
+  --accent-foreground: #e0f2e9;
+  --destructive: #ff3344;
+  --destructive-foreground: #ffffff;
+  --info: #00f0ff;
+  --info-foreground: #001015;
+  --warning: #ffb800;
+  --warning-foreground: #1a1200;
+  --border: #1f3329;
+  --input: #1f3329;
+  --ring: #00ff66;
+
+  --glow-primary: 0 0 16px rgba(0, 255, 102, 0.4);
+  --glow-destructive: 0 0 16px rgba(255, 51, 68, 0.4);
   --grid-bg:
-    linear-gradient(color-mix(in oklab, var(--primary) 5%, transparent) 1px, transparent 1px),
-    linear-gradient(90deg, color-mix(in oklab, var(--primary) 5%, transparent) 1px, transparent 1px);
+    linear-gradient(rgba(0, 255, 102, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(0, 255, 102, 0.04) 1px, transparent 1px);
+}
+
+/* Enhanced color fidelity for modern browsers that support @supports (color: oklch(0 0 0)) */
+@supports (color: oklch(0 0 0)) {
+  :root {
+    --background: oklch(0.13 0.015 160);
+    --foreground: oklch(0.93 0.03 150);
+    --card: oklch(0.17 0.02 160);
+    --card-foreground: oklch(0.93 0.03 150);
+    --popover: oklch(0.16 0.02 160);
+    --popover-foreground: oklch(0.93 0.03 150);
+    --primary: oklch(0.87 0.24 148);
+    --primary-foreground: oklch(0.15 0.03 150);
+    --secondary: oklch(0.22 0.025 160);
+    --secondary-foreground: oklch(0.9 0.03 150);
+    --muted: oklch(0.2 0.02 160);
+    --muted-foreground: oklch(0.62 0.04 155);
+    --accent: oklch(0.24 0.04 160);
+    --accent-foreground: oklch(0.93 0.03 150);
+    --destructive: oklch(0.65 0.24 18);
+    --destructive-foreground: oklch(0.97 0.01 20);
+    --info: oklch(0.85 0.14 200);
+    --info-foreground: oklch(0.15 0.03 200);
+    --warning: oklch(0.83 0.17 80);
+    --warning-foreground: oklch(0.18 0.04 80);
+    --border: oklch(0.28 0.035 160);
+    --input: oklch(0.28 0.035 160);
+    --ring: oklch(0.87 0.24 148);
+  }
 }
 
 @layer base {
   * {
     border-color: var(--color-border);
+    box-sizing: border-box;
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    min-height: 100%;
+    overflow-x: hidden;
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
   }
   body {
     background-color: var(--color-background);
     background-image: var(--grid-bg);
-    background-size: 32px 32px;
+    background-size: 24px 24px;
     color: var(--color-foreground);
     font-family: var(--font-sans);
   }
@@ -83,10 +125,18 @@
 
 @layer components {
   .panel {
-    @apply rounded-lg border border-border bg-card/80 backdrop-blur-sm;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-card);
+  }
+  @supports (backdrop-filter: blur(8px)) {
+    .panel {
+      backdrop-filter: blur(8px);
+      background-color: rgba(15, 23, 19, 0.85);
+    }
   }
   .glow-text {
-    text-shadow: 0 0 12px color-mix(in oklab, currentColor 60%, transparent);
+    text-shadow: 0 0 10px rgba(0, 255, 102, 0.5);
   }
   .glow-box {
     box-shadow: var(--glow-primary);
@@ -95,22 +145,42 @@
     box-shadow: var(--glow-destructive);
   }
   .scanlines {
-    background-image: repeating-linear-gradient(
-      to bottom,
-      color-mix(in oklab, var(--primary) 4%, transparent) 0 1px,
-      transparent 1px 3px
-    );
+    position: relative;
   }
-  .tap-core {
-    background: radial-gradient(circle at 50% 40%, color-mix(in oklab, var(--primary) 30%, var(--card)), var(--card) 70%);
+  .scanlines::before {
+    content: " ";
+    display: block;
+    position: absolute;
+    top: 0; left: 0; bottom: 0; right: 0;
+    background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+    background-size: 100% 4px;
+    z-index: 10;
+    pointer-events: none;
+    opacity: 0.6;
   }
 }
 
 @keyframes float-up {
-  0% { opacity: 1; transform: translate(-50%, 0) scale(1); }
-  100% { opacity: 0; transform: translate(-50%, -70px) scale(1.15); }
+  0% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-40px) scale(1.15);
+  }
 }
-.animate-float-up { animation: float-up 0.9s ease-out forwards; }
 
-@keyframes spin-slow { to { transform: rotate(360deg); } }
-.animate-spin-slow { animation: spin-slow 14s linear infinite; }
+.animate-float-up {
+  animation: float-up 0.8s ease-out forwards;
+}
+
+@keyframes spin-slow {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 16s linear infinite;
+}

@@ -1,10 +1,10 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import {
-  Bitcoin, Crosshair, Moon, ScrollText, ShoppingCart, Skull, Terminal, Thermometer, Siren, Fish, Flame, Volume2, VolumeX, ShieldAlert
+  Bitcoin, Crosshair, Moon, ScrollText, ShoppingCart, Skull, Terminal, Thermometer, Siren, Fish, Flame, Volume2, VolumeX, Globe
 } from "lucide-react";
 import { useGame } from "@/game/useGame";
-import { LEVEL_THRESHOLDS, LEVEL_TITLES, TARGETS } from "@/game/data";
+import { LEVEL_THRESHOLDS, TARGETS, getLevelTitle } from "@/game/data";
 import { cashPerSecond, fmt, getLevel, isThrottling, perkLevel, resolveCrisis, resolveHack, startHack, type GameState } from "@/game/engine";
 import { cn } from "@/lib/utils";
 import { TerminalTab } from "@/components/game/TerminalTab";
@@ -16,14 +16,15 @@ import { DarknetTab } from "@/components/game/DarknetTab";
 import { HackModal } from "@/components/game/HackModal";
 import { GameButton, Meter, formatDuration } from "@/components/game/ui";
 import { sound } from "@/lib/audio";
+import { getLang, setLang, t, type Lang } from "@/lib/i18n";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Crypto Hacker Simulator — кібер-клікер" },
-      { name: "description", content: "Хакерський idle-клікер: ботнети, DeFi-злами, відмивання крипти, біржа та репутація даркнету." },
+      { title: "Crypto Hacker Simulator — Cyber Clicker" },
+      { name: "description", content: "Cyberpunk incremental clicker: botnets, DeFi exploits, Tornado Cash laundering, DEX trading, and Darknet Street Cred." },
       { property: "og:title", content: "Crypto Hacker Simulator" },
-      { property: "og:description", content: "Збудуй кібер-синдикат: від скрипт-кідді до легенди даркнету." },
+      { property: "og:description", content: "Build your cyber syndicate: from basement script kiddie to legendary ghost of Satoshi." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -32,14 +33,6 @@ export const Route = createFileRoute("/")({
 });
 
 type Tab = "terminal" | "shop" | "ops" | "contracts" | "market" | "darknet";
-const NAV: { id: Tab; label: string; icon: typeof Terminal }[] = [
-  { id: "terminal", label: "Термінал", icon: Terminal },
-  { id: "shop", label: "Апгрейди", icon: ShoppingCart },
-  { id: "ops", label: "Операції", icon: Crosshair },
-  { id: "contracts", label: "Контракти", icon: ScrollText },
-  { id: "market", label: "Біржа", icon: Bitcoin },
-  { id: "darknet", label: "Даркнет", icon: Skull },
-];
 
 function useNow() {
   const [now, setNow] = useState(() => Date.now());
@@ -55,6 +48,7 @@ function Game() {
   const [tab, setTab] = useState<Tab>("terminal");
   const [hackId, setHackId] = useState<string | null>(null);
   const [audioEnabled, setAudioEnabled] = useState(sound.enabled);
+  const [lang, setLangState] = useState<Lang>(getLang);
   const now = useNow();
 
   const toggleSound = () => {
@@ -62,8 +56,19 @@ function Game() {
     setAudioEnabled(next);
   };
 
+  const toggleLang = () => {
+    const next = lang === "en" ? "ua" : "en";
+    setLang(next);
+    setLangState(next);
+    sound.playTap(1.2);
+  };
+
   if (!state) {
-    return <div className="flex min-h-screen items-center justify-center font-mono text-primary animate-pulse">Підключення до захищеної мережі TOR...</div>;
+    return (
+      <div className="flex min-h-screen items-center justify-center font-mono text-primary animate-pulse">
+        {t("connectingTor", lang)}
+      </div>
+    );
   }
   const s = state;
 
@@ -75,12 +80,21 @@ function Game() {
       setHackId(id);
     }
   };
-  const hackTarget = TARGETS.find((t) => t.id === hackId);
+  const hackTarget = TARGETS.find((it) => it.id === hackId);
 
   const switchTab = (newTab: Tab) => {
     sound.playTap(1.1);
     setTab(newTab);
   };
+
+  const navItems: { id: Tab; label: string; shortLabel: string; icon: typeof Terminal }[] = [
+    { id: "terminal", label: t("tabTerminal", lang), shortLabel: t("navTerminal", lang), icon: Terminal },
+    { id: "shop", label: t("tabShop", lang), shortLabel: t("navShop", lang), icon: ShoppingCart },
+    { id: "ops", label: t("tabOps", lang), shortLabel: t("navOps", lang), icon: Crosshair },
+    { id: "contracts", label: t("tabContracts", lang), shortLabel: t("navContracts", lang), icon: ScrollText },
+    { id: "market", label: t("tabMarket", lang), shortLabel: t("navMarket", lang), icon: Bitcoin },
+    { id: "darknet", label: t("tabDarknet", lang), shortLabel: t("navDarknet", lang), icon: Skull },
+  ];
 
   return (
     <div className="mx-auto flex min-h-screen max-w-6xl flex-col lg:flex-row lg:gap-6 lg:p-6">
@@ -89,17 +103,29 @@ function Game() {
         <div className="sticky top-6 space-y-4">
           <div className="flex items-center justify-between">
             <Logo />
-            <button
-              type="button"
-              onClick={toggleSound}
-              title={audioEnabled ? "Вимкнути звук" : "Увімкнути звук"}
-              className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-            >
-              {audioEnabled ? <Volume2 className="size-4 text-primary" /> : <VolumeX className="size-4" />}
-            </button>
+            <div className="flex items-center gap-1">
+              <button
+                type="button"
+                onClick={toggleLang}
+                title={lang === "en" ? "Switch to Ukrainian" : "Switch to English"}
+                className="px-2 py-1 rounded-md border border-border bg-card/60 text-xs font-mono font-bold text-muted-foreground hover:text-foreground transition-colors cursor-pointer flex items-center gap-1"
+              >
+                <Globe className="size-3" />
+                <span>{lang.toUpperCase()}</span>
+              </button>
+              <button
+                type="button"
+                onClick={toggleSound}
+                title={audioEnabled ? "Mute SFX" : "Enable SFX"}
+                className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
+              >
+                {audioEnabled ? <Volume2 className="size-4 text-primary" /> : <VolumeX className="size-4" />}
+              </button>
+            </div>
           </div>
+
           <nav className="space-y-1">
-            {NAV.map((n) => (
+            {navItems.map((n) => (
               <button
                 key={n.id}
                 type="button"
@@ -120,43 +146,54 @@ function Game() {
       <div className="flex min-w-0 flex-1 flex-col pb-20 lg:pb-0">
         <div className="flex items-center justify-between px-4 pt-4 lg:hidden">
           <Logo />
-          <button
-            type="button"
-            onClick={toggleSound}
-            title={audioEnabled ? "Вимкнути звук" : "Увімкнути звук"}
-            className="p-1.5 rounded-md border border-border bg-card/60 text-muted-foreground hover:text-foreground cursor-pointer"
-          >
-            {audioEnabled ? <Volume2 className="size-4 text-primary" /> : <VolumeX className="size-4" />}
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={toggleLang}
+              title={lang === "en" ? "Switch to Ukrainian" : "Switch to English"}
+              className="px-2 py-1 rounded-md border border-border bg-card/60 text-xs font-mono font-bold text-muted-foreground hover:text-foreground cursor-pointer flex items-center gap-1"
+            >
+              <Globe className="size-3" />
+              <span>{lang.toUpperCase()}</span>
+            </button>
+            <button
+              type="button"
+              onClick={toggleSound}
+              title={audioEnabled ? "Mute SFX" : "Enable SFX"}
+              className="p-1.5 rounded-md border border-border bg-card/60 text-muted-foreground hover:text-foreground cursor-pointer"
+            >
+              {audioEnabled ? <Volume2 className="size-4 text-primary" /> : <VolumeX className="size-4" />}
+            </button>
+          </div>
         </div>
 
-        <StatBar s={s} />
-        <CrisisBanner s={s} now={now} act={act} />
+        <StatBar s={s} lang={lang} />
+        <CrisisBanner s={s} now={now} act={act} lang={lang} />
 
         <main className="flex-1 p-4 lg:px-0">
-          {tab === "terminal" && <TerminalTab s={s} act={act} />}
-          {tab === "shop" && <ShopTab s={s} act={act} />}
-          {tab === "ops" && <OpsTab s={s} act={act} now={now} onStart={startOp} />}
-          {tab === "contracts" && <ContractsTab s={s} act={act} now={now} />}
-          {tab === "market" && <MarketTab s={s} act={act} />}
-          {tab === "darknet" && <DarknetTab s={s} act={act} onReset={reset} />}
+          {tab === "terminal" && <TerminalTab s={s} act={act} lang={lang} />}
+          {tab === "shop" && <ShopTab s={s} act={act} lang={lang} />}
+          {tab === "ops" && <OpsTab s={s} act={act} now={now} onStart={startOp} lang={lang} />}
+          {tab === "contracts" && <ContractsTab s={s} act={act} now={now} lang={lang} />}
+          {tab === "market" && <MarketTab s={s} act={act} lang={lang} />}
+          {tab === "darknet" && <DarknetTab s={s} act={act} onReset={reset} lang={lang} />}
         </main>
       </div>
 
       {/* Mobile Bottom Navigation Bar */}
-      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-6 border-t border-border bg-card/95 backdrop-blur lg:hidden">
-        {NAV.map((n) => (
+      <nav className="fixed inset-x-0 bottom-0 z-40 grid grid-cols-6 border-t border-border bg-card/95 backdrop-blur lg:hidden pb-[env(safe-area-inset-bottom,0px)]">
+        {navItems.map((n) => (
           <button
             key={n.id}
             type="button"
             onClick={() => switchTab(n.id)}
             className={cn(
-              "flex flex-col items-center justify-center gap-0.5 py-2 text-[8px] font-bold uppercase transition-colors",
-              tab === n.id ? "text-primary" : "text-muted-foreground"
+              "flex flex-col items-center justify-center gap-0.5 py-2 text-[9px] font-bold uppercase transition-colors active:scale-95",
+              tab === n.id ? "text-primary bg-primary/10" : "text-muted-foreground hover:text-foreground"
             )}
           >
-            <n.icon className="size-4" />
-            <span className="truncate max-w-[50px]">{n.label}</span>
+            <n.icon className="size-4 shrink-0" />
+            <span className="truncate max-w-[54px] tracking-tight text-center leading-none">{n.shortLabel}</span>
           </button>
         ))}
       </nav>
@@ -166,6 +203,7 @@ function Game() {
         <HackModal
           target={hackTarget}
           bonusSec={perkLevel(s, "hacker") * 1.5}
+          lang={lang}
           onDone={(ok) => {
             const id = hackTarget.id;
             setHackId(null);
@@ -179,9 +217,9 @@ function Game() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/85 p-4 backdrop-blur-sm">
           <div className="panel w-full max-w-sm p-6 text-center border-primary/40 glow-box">
             <Moon className="mx-auto size-10 text-info animate-pulse" />
-            <div className="mt-3 text-lg font-bold text-foreground">Поки ти був офлайн</div>
+            <div className="mt-3 text-lg font-bold text-foreground">{t("offlineTitle", lang)}</div>
             <div className="mt-1 text-xs text-muted-foreground leading-relaxed">
-              Ботнет непомітно працював у фоні {formatDuration(offline.seconds)}
+              {t("offlineDesc", lang, { time: formatDuration(offline.seconds) })}
             </div>
             <div className="mt-3 text-3xl font-bold text-primary glow-text">+{fmt(offline.earned)}</div>
             <GameButton
@@ -191,7 +229,7 @@ function Game() {
                 dismissOffline();
               }}
             >
-              Забрати крипту
+              {t("offlineClaimBtn", lang)}
             </GameButton>
           </div>
         </div>
@@ -212,32 +250,33 @@ function Logo() {
   );
 }
 
-function StatBar({ s }: { s: GameState }) {
+function StatBar({ s, lang }: { s: GameState; lang: Lang }) {
   const level = getLevel(s.runEarned);
   const cur = LEVEL_THRESHOLDS[level - 1] ?? 0;
   const next = LEVEL_THRESHOLDS[level];
   const pct = next ? ((s.runEarned - cur) / (next - cur)) * 100 : 100;
   const throttling = isThrottling(s);
   const isOverheating = s.temp >= 92;
+  const rankTitle = getLevelTitle(level, lang);
 
   return (
     <div className="panel mx-4 mt-4 grid gap-3 p-4 lg:mx-0 lg:mt-0">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <div className="font-mono text-[10px] uppercase text-muted-foreground">Чистий баланс</div>
+          <div className="font-mono text-[10px] uppercase text-muted-foreground">{t("cleanBalance", lang)}</div>
           <div className="text-3xl font-bold text-primary glow-text">{fmt(s.cash)}</div>
           <div className="font-mono text-xs text-info">
-            +{fmt(cashPerSecond(s))}/с
-            {throttling && <span className="ml-2 text-destructive font-bold">ТРОТЛІНГ ×0.4</span>}
+            +{fmt(cashPerSecond(s))}/s
+            {throttling && <span className="ml-2 text-destructive font-bold">{t("throttlingAlert", lang)}</span>}
           </div>
         </div>
         <div className="flex flex-wrap gap-4 font-mono text-xs">
           <div>
-            <div className="text-[10px] uppercase text-muted-foreground">Брудні</div>
+            <div className="text-[10px] uppercase text-muted-foreground">{t("dirtyCrypto", lang)}</div>
             <div className="font-bold text-warning">{fmt(s.dirty)}</div>
           </div>
           <div>
-            <div className="text-[10px] uppercase text-muted-foreground">Репутація</div>
+            <div className="text-[10px] uppercase text-muted-foreground">{t("reputation", lang)}</div>
             <div className="font-bold text-info">{s.credibility}</div>
           </div>
           <div className="flex items-center gap-1">
@@ -253,13 +292,13 @@ function StatBar({ s }: { s: GameState }) {
         <Meter
           value={pct}
           tone="primary"
-          label={`Ранг ${level}/15: ${LEVEL_TITLES[level - 1] ?? "Сатоші"}`}
-          right={next ? `${fmt(s.runEarned)} / ${fmt(next)}` : "МАКСИМУМ"}
+          label={`${t("rankPrefix", lang)} ${level}/15: ${rankTitle}`}
+          right={next ? `${fmt(s.runEarned)} / ${fmt(next)}` : t("maxLevel", lang)}
         />
         <Meter
           value={s.heat}
           tone={s.heat > 75 ? "destructive" : s.heat > 45 ? "warning" : "muted"}
-          label="Загроза FBI"
+          label={t("fbiThreat", lang)}
           right={`${s.heat.toFixed(0)}%`}
         />
       </div>
@@ -267,14 +306,35 @@ function StatBar({ s }: { s: GameState }) {
   );
 }
 
-function CrisisBanner({ s, now, act }: { s: GameState; now: number; act: (fn: (s: GameState) => GameState) => void }) {
+function CrisisBanner({
+  s, now, act, lang,
+}: { s: GameState; now: number; act: (fn: (s: GameState) => GameState) => void; lang: Lang }) {
   const c = s.crisis;
   if (!c) return null;
   const left = (c.endsAt - now) / 1000;
+
   const info = {
-    police: { icon: Siren, title: "Ордер на обшук!", text: "Кіберполіція вийшла на слід. Підкупи інформатора, або буде облава.", btn: `Підкупити · ${fmt(c.cost)}`, tone: "destructive" as const },
-    overheat: { icon: Flame, title: "Пожежа в серверній!", text: "Проводка плавиться. Виклич техніка, або залізо згорить.", btn: `Викликати техніка · ${fmt(c.cost)}`, tone: "warning" as const },
-    whale: { icon: Fish, title: "Кит у мемпулі!", text: "Величезна транзакція без захисту. Встигни перехопити сендвічем!", btn: `Перехопити +${fmt(c.reward)}`, tone: "primary" as const },
+    police: {
+      icon: Siren,
+      title: t("crisisPoliceTitle", lang),
+      text: t("crisisPoliceDesc", lang),
+      btn: t("crisisPoliceBtn", lang, { cost: fmt(c.cost) }),
+      tone: "destructive" as const,
+    },
+    overheat: {
+      icon: Flame,
+      title: t("crisisOverheatTitle", lang),
+      text: t("crisisOverheatDesc", lang),
+      btn: t("crisisOverheatBtn", lang, { cost: fmt(c.cost) }),
+      tone: "warning" as const,
+    },
+    whale: {
+      icon: Fish,
+      title: t("crisisWhaleTitle", lang),
+      text: t("crisisWhaleDesc", lang),
+      btn: t("crisisWhaleBtn", lang, { val: fmt(c.reward) }),
+      tone: "primary" as const,
+    },
   }[c.type];
 
   return (

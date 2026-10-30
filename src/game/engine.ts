@@ -119,8 +119,8 @@ export function createInitialState(now: number): GameState {
     crisis: null,
     nextCrisisAt: now + 4 * 60 * 1000,
     logs: [
-      { id: 1, text: "[*] SHADOW TERMINAL v5.0 — з'єднання через TOR встановлено", kind: "info" },
-      { id: 2, text: "[*] Тапай по терміналу, щоб брутфорсити хеші. Купуй софт для пасивного доходу.", kind: "info" },
+      { id: 1, text: "[*] SHADOW TERMINAL v5.0 — TOR onion circuit established", kind: "info" },
+      { id: 2, text: "[*] Tap terminal to brute force hashes. Deploy software for passive $/s income.", kind: "info" },
     ],
     logSeq: 2,
     lastSaved: now,
@@ -251,12 +251,12 @@ export function buyUpgrade(s: GameState, id: string): GameState {
     owned: { ...s.owned, [id]: n + 1 },
     stats: { ...s.stats, bought: s.stats.bought + 1 },
   };
-  if ((n + 1) % MILESTONE_STEP === 0) next = log(next, `[★] ${def.name} ×${n + 1} — віддача подвоєна!`, "ok");
+  if ((n + 1) % MILESTONE_STEP === 0) next = log(next, `[★] ${def.name} ×${n + 1} — output doubled!`, "ok");
   return next;
 }
 
 export function purgeFans(s: GameState): GameState {
-  return log({ ...s, temp: Math.max(35, s.temp - 18) }, "[❄] Екстрена продувка рідким азотом: −18°C", "info");
+  return log({ ...s, temp: Math.max(35, s.temp - 18) }, "[❄] Liquid Nitrogen Purge: −18°C", "info");
 }
 
 export function startHack(s: GameState, id: string, now: number): GameState | null {
@@ -267,7 +267,7 @@ export function startHack(s: GameState, id: string, now: number): GameState | nu
   const gas = hackGasCost(s, t.requiredLevel);
   if (s.cash < gas) return null;
   const next = { ...s, cash: s.cash - gas, cooldowns: { ...s.cooldowns, [id]: now + t.cooldownSec * 1000 } };
-  return log(next, `[⛽] Сплачено ${fmt(gas)} газу. Ін'єкція в «${t.title}»...`, "info");
+  return log(next, `[⛽] Paid ${fmt(gas)} gas. Payload injected into «${t.title}»...`, "info");
 }
 
 export function resolveHack(s: GameState, id: string, success: boolean, rand: number): GameState {
@@ -284,9 +284,9 @@ export function resolveHack(s: GameState, id: string, success: boolean, rand: nu
       heat: Math.min(100, s.heat + t.heat * stealth),
       stats: { ...s.stats, hacks: s.stats.hacks + 1 },
     };
-    return log(next, `[🔥] Злам «${t.title}» успішний: +${fmt(loot)} брудних`, "ok");
+    return log(next, `[🔥] Infiltration successful: «${t.title}» +${fmt(loot)} dirty crypto`, "ok");
   }
-  return log({ ...s, heat: Math.min(100, s.heat + t.heat * 1.5 * stealth) }, `[✖] «${t.title}»: IDS заблокував атаку. Загроза росте!`, "bad");
+  return log({ ...s, heat: Math.min(100, s.heat + t.heat * 1.5 * stealth) }, `[✖] «${t.title}»: IDS blocked payload! FBI threat escalated!`, "bad");
 }
 
 export function wash(s: GameState): GameState {
@@ -300,13 +300,13 @@ export function wash(s: GameState): GameState {
     heat: Math.max(0, s.heat - 25),
     stats: { ...s.stats, washed: s.stats.washed + s.dirty, washes: s.stats.washes + 1 },
   };
-  return log(next, `[🌪] Tornado Cash: відмито ${fmt(s.dirty)} → +${fmt(clean)} чистих (комісія ${Math.round(fee * 100)}%, загроза FBI −25%)`, "ok");
+  return log(next, `[🌪] Tornado Cash: ${fmt(s.dirty)} washed → +${fmt(clean)} clean (fee ${Math.round(fee * 100)}%, FBI threat −25%)`, "ok");
 }
 
 export function bribe(s: GameState): GameState {
   const cost = bribeCost(s);
   if (s.cash < cost || s.heat <= 0) return s;
-  return log({ ...s, cash: s.cash - cost, heat: Math.max(0, s.heat - 35) }, `[🛡] Змінено IP/MAC, знищено пристрої: −35% загрози (${fmt(cost)})`, "info");
+  return log({ ...s, cash: s.cash - cost, heat: Math.max(0, s.heat - 35) }, `[🛡] Burner phones destroyed, MAC rotated: −35% threat (${fmt(cost)})`, "info");
 }
 
 export function buyCoin(s: GameState, symbol: string, spend: number): GameState {
@@ -333,7 +333,7 @@ export function sellCoin(s: GameState, symbol: string): GameState {
     holdings,
     stats: { ...s.stats, tradeProfit: s.stats.tradeProfit + Math.max(0, profit) },
   };
-  return log(next, `[₿] Продано ${symbol}: ${fmt(value)} (${profit >= 0 ? "+" : ""}${fmt(profit)})`, profit >= 0 ? "ok" : "warn");
+  return log(next, `[₿] Sold ${symbol}: ${fmt(value)} (${profit >= 0 ? "+" : ""}${fmt(profit)})`, profit >= 0 ? "ok" : "warn");
 }
 
 export function buyPerk(s: GameState, id: string): GameState {
@@ -360,7 +360,7 @@ export function prestige(s: GameState, now: number): GameState {
     stats: { ...s.stats, prestiges: s.stats.prestiges + 1 },
     logSeq: s.logSeq,
   };
-  return log(next, `[🏖] Операція «Чистий аркуш»: +${gain} репутації даркнету`, "ok");
+  return log(next, `[🏖] Operation «Clean Slate»: +${gain} Darknet Reputation`, "ok");
 }
 
 // ---------- contracts ----------
@@ -451,7 +451,7 @@ function raid(s: GameState): GameState {
     heat: 30,
     stats: { ...s.stats, raids: s.stats.raids + 1 },
   };
-  return log(next, `[🚨] ОБЛАВА КІБЕРПОЛІЦІЇ! Втрачено ${fmt(lostDirty + lostCash)}`, "bad");
+  return log(next, `[🚨] CYBER POLICE RAID! Confiscated ${fmt(lostDirty + lostCash)} in contraband crypto!`, "bad");
 }
 
 // ---------- tick ----------
@@ -486,7 +486,7 @@ function checkAchievements(s: GameState): GameState {
       credibility: next.credibility + a.reward,
       credibilityTotal: next.credibilityTotal + a.reward,
     };
-    next = log(next, `[🏆] Досягнення: ${a.title}${a.reward ? ` (+${a.reward} реп.)` : ""}`, "ok");
+    next = log(next, `[🏆] Achievement Unlocked: ${a.title}${a.reward ? ` (+${a.reward} rep)` : ""}`, "ok");
   }
   return next;
 }
@@ -514,7 +514,7 @@ export function tick(s: GameState, dtSec: number, now: number, rand: () => numbe
         owned: { ...next.owned, [burnt.id]: next.owned[burnt.id] - 1 },
         temp: Math.max(70, next.temp - 12),
       };
-      next = log(next, `[💥] ПЕРЕГРІВ ${next.temp.toFixed(1)}°C! Через брак охолодження згорів 1× «${burnt.name}»!`, "bad");
+      next = log(next, `[💥] OVERHEAT ${next.temp.toFixed(1)}°C! 1× «${burnt.name}» burned out from lack of cooling!`, "bad");
     }
   }
 
@@ -525,8 +525,8 @@ export function tick(s: GameState, dtSec: number, now: number, rand: () => numbe
     const c = next.crisis;
     next = { ...next, crisis: null };
     if (c.type === "police") next = raid(next);
-    else if (c.type === "overheat") next = log({ ...next, temp: 105 }, "[🔥] Риги перегрілись! Тротлінг на повну", "bad");
-    else next = log(next, "[🐋] Кит пішов. Можливість втрачено", "warn");
+    else if (c.type === "overheat") next = log({ ...next, temp: 105 }, "[🔥] Rigs overheated! Heavy throttling engaged", "bad");
+    else next = log(next, "[🐋] Whale transaction passed. Opportunity missed", "warn");
   } else if (!next.crisis && now >= next.nextCrisisAt && prevLevel >= 2) {
     const roll = rand();
     const type: CrisisType = roll < 0.4 ? "police" : roll < 0.7 ? "overheat" : "whale";
@@ -539,7 +539,7 @@ export function tick(s: GameState, dtSec: number, now: number, rand: () => numbe
   if (now >= next.contractsRefreshAt) next = generateContracts(next, now, rand);
 
   const newLevel = getLevel(next.runEarned);
-  if (newLevel > prevLevel) next = log(next, `[⬆] Новий рівень ${newLevel}! Відкрито нові апгрейди та цілі`, "ok");
+  if (newLevel > prevLevel) next = log(next, `[⬆] Rank Up! You reached Rank ${newLevel}! New exploits & hardware unlocked!`, "ok");
 
   return checkAchievements(next);
 }

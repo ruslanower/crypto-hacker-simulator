@@ -1,8 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Eye, EyeOff, Terminal } from "lucide-react";
-import type { TargetDef } from "@/game/data";
+import { type TargetDef, getTargetTitle, getTargetRef } from "@/game/data";
 import { cn } from "@/lib/utils";
 import { sound } from "@/lib/audio";
+import { t, type Lang } from "@/lib/i18n";
 
 const OPCODES = ["DE", "AD", "BE", "EF", "CA", "FE", "BA", "13", "37", "8F", "00", "C0", "FF", "EE", "42", "69", "A7", "5C"];
 const MAX_STRIKES = 3;
@@ -19,7 +20,9 @@ function makeRound(len: number) {
   return { seq, grid: [...grid].sort(() => Math.random() - 0.5) };
 }
 
-export function HackModal({ target, bonusSec, onDone }: { target: TargetDef; bonusSec: number; onDone: (ok: boolean) => void }) {
+export function HackModal({
+  target, bonusSec, onDone, lang,
+}: { target: TargetDef; bonusSec: number; onDone: (ok: boolean) => void; lang: Lang }) {
   const roundMs = (target.timeSec + bonusSec) * 1000;
   const [round, setRound] = useState(1);
   const [data, setData] = useState(() => makeRound(target.seqLength));
@@ -40,8 +43,8 @@ export function HackModal({ target, bonusSec, onDone }: { target: TargetDef; bon
 
   useEffect(() => {
     if (!preview) return;
-    const t = setTimeout(() => setPreview(false), PREVIEW_MS);
-    return () => clearTimeout(t);
+    const tm = setTimeout(() => setPreview(false), PREVIEW_MS);
+    return () => clearTimeout(tm);
   }, [preview, round]);
 
   useEffect(() => {
@@ -83,21 +86,29 @@ export function HackModal({ target, bonusSec, onDone }: { target: TargetDef; bon
 
   const pct = (left / roundMs) * 100;
   const critical = pct < 30 && !preview;
+  const title = getTargetTitle(target, lang);
+  const refText = getTargetRef(target, lang);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-background/85 p-4 backdrop-blur-sm">
       <div className={cn("panel w-full max-w-md border-2 p-5", critical ? "border-destructive glow-danger" : "border-info", shake && "animate-pulse")}>
         <div className="flex items-center justify-between border-b border-border pb-2 font-mono text-xs">
-          <span className="flex items-center gap-2 font-bold text-info"><Terminal className="size-4" /> ІН'ЄКЦІЯ ШЕЛЛКОДУ</span>
-          <span className="text-destructive">ПОМИЛКИ {strikes}/{MAX_STRIKES}</span>
+          <span className="flex items-center gap-2 font-bold text-info">
+            <Terminal className="size-4" /> {t("minigameTitle", lang)}
+          </span>
+          <span className="text-destructive font-bold">
+            {t("minigameStrikes", lang)} {strikes}/{MAX_STRIKES}
+          </span>
         </div>
 
         <div className="mt-3 flex items-start justify-between gap-3">
           <div>
-            <div className="font-bold">{target.title}</div>
-            <div className="text-[11px] text-muted-foreground">{target.reference}</div>
+            <div className="font-bold text-foreground">{title}</div>
+            <div className="text-[11px] text-muted-foreground">{refText}</div>
           </div>
-          <div className="rounded bg-muted px-2 py-1 font-mono text-xs text-info">Раунд {round}/{target.rounds}</div>
+          <div className="rounded bg-muted px-2 py-1 font-mono text-xs text-info font-bold">
+            {t("minigameRound", lang, { cur: round, total: target.rounds })}
+          </div>
         </div>
 
         <div className="mt-4 flex items-center justify-center gap-1.5 rounded-md border border-border bg-background/60 p-3">
@@ -119,7 +130,13 @@ export function HackModal({ target, bonusSec, onDone }: { target: TargetDef; bon
         </div>
 
         <div className="mt-2 flex items-center justify-center gap-1.5 font-mono text-[11px] text-muted-foreground">
-          {preview ? <><Eye className="size-3.5 text-warning" /> Запам'ятай послідовність...</> : target.hidden ? <><EyeOff className="size-3.5" /> Введи з пам'яті</> : "Натискай байти по порядку"}
+          {preview ? (
+            <><Eye className="size-3.5 text-warning" /> {lang === "ua" ? "Запам'ятай послідовність..." : "Memorize sequence..."}</>
+          ) : target.hidden ? (
+            <><EyeOff className="size-3.5" /> {lang === "ua" ? "Введи з пам'яті" : "Enter from memory"}</>
+          ) : (
+            lang === "ua" ? "Натискай байти по порядку" : "Press opcodes in order"
+          )}
         </div>
 
         <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
@@ -133,15 +150,19 @@ export function HackModal({ target, bonusSec, onDone }: { target: TargetDef; bon
               type="button"
               disabled={preview}
               onClick={() => press(op)}
-              className="rounded-md border border-border bg-secondary py-3 font-mono text-sm font-bold text-foreground transition-all hover:border-info hover:text-info active:scale-90 disabled:opacity-40"
+              className="rounded-md border border-border bg-secondary py-3 font-mono text-sm font-bold text-foreground transition-all hover:border-info hover:text-info active:scale-90 disabled:opacity-40 cursor-pointer"
             >
               0x{op}
             </button>
           ))}
         </div>
 
-        <button type="button" onClick={() => finish(false)} className="mt-4 w-full font-mono text-[11px] uppercase text-muted-foreground hover:text-destructive">
-          Перервати атаку (провал)
+        <button
+          type="button"
+          onClick={() => finish(false)}
+          className="mt-4 w-full font-mono text-[11px] uppercase text-muted-foreground hover:text-destructive cursor-pointer"
+        >
+          {lang === "ua" ? "Перервати атаку (провал)" : "Abort attack (failure)"}
         </button>
       </div>
     </div>
