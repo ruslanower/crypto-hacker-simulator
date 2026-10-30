@@ -97,7 +97,7 @@ function Game() {
   ];
 
   return (
-    <div className="mx-auto flex min-h-screen max-w-6xl flex-col lg:flex-row lg:gap-6 lg:p-6">
+    <div className="mx-auto flex min-h-screen max-w-6xl flex-col lg:flex-row lg:gap-6 lg:p-6 w-full max-w-full overflow-x-hidden">
       {/* Desktop Sidebar */}
       <aside className="hidden w-56 shrink-0 lg:block">
         <div className="sticky top-6 space-y-4">
@@ -143,8 +143,8 @@ function Game() {
       </aside>
 
       {/* Main Content Area */}
-      <div className="flex min-w-0 flex-1 flex-col pb-20 lg:pb-0">
-        <div className="flex items-center justify-between px-4 pt-4 lg:hidden">
+      <div className="flex min-w-0 flex-1 flex-col pb-20 lg:pb-0 w-full max-w-full overflow-x-hidden">
+        <div className="flex items-center justify-between px-3 sm:px-4 pt-3 sm:pt-4 lg:hidden">
           <Logo />
           <div className="flex items-center gap-2">
             <button
@@ -170,7 +170,7 @@ function Game() {
         <StatBar s={s} lang={lang} />
         <CrisisBanner s={s} now={now} act={act} lang={lang} />
 
-        <main className="flex-1 p-4 lg:px-0">
+        <main className="flex-1 p-3 sm:p-4 lg:px-0 w-full min-w-0 max-w-full">
           {tab === "terminal" && <TerminalTab s={s} act={act} lang={lang} />}
           {tab === "shop" && <ShopTab s={s} act={act} lang={lang} />}
           {tab === "ops" && <OpsTab s={s} act={act} now={now} onStart={startOp} lang={lang} />}
@@ -260,7 +260,7 @@ function StatBar({ s, lang }: { s: GameState; lang: Lang }) {
   const rankTitle = getLevelTitle(level, lang);
 
   return (
-    <div className="panel mx-4 mt-2 grid gap-2.5 p-3 sm:p-4 lg:mx-0 lg:mt-0">
+    <div className="panel mx-3 sm:mx-4 mt-2 grid gap-2.5 p-3 sm:p-4 lg:mx-0 lg:mt-0">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="font-mono text-[10px] uppercase text-muted-foreground">{t("cleanBalance", lang)}</div>
@@ -343,7 +343,7 @@ function CrisisBanner({
   }[c.type];
 
   return (
-    <div className={cn("panel mx-4 mt-3 flex flex-wrap items-center gap-3 border-2 p-3 lg:mx-0", c.type === "whale" ? "border-primary glow-box" : "border-destructive glow-danger")}>
+    <div className={cn("panel mx-3 sm:mx-4 mt-3 flex flex-wrap items-center gap-3 border-2 p-3 lg:mx-0", c.type === "whale" ? "border-primary glow-box" : "border-destructive glow-danger")}>
       <info.icon className={cn("size-7 animate-pulse", c.type === "whale" ? "text-primary" : "text-destructive")} />
       <div className="min-w-0 flex-1">
         <div className="font-bold text-foreground">{info.title} <span className="font-mono text-xs text-muted-foreground">· {formatDuration(left)}</span></div>

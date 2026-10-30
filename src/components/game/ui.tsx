@@ -44,10 +44,10 @@ export function Meter({ value, tone, label, right }: { value: number; tone: Tone
     primary: "bg-primary", info: "bg-info", warning: "bg-warning", destructive: "bg-destructive", muted: "bg-muted-foreground",
   };
   return (
-    <div>
-      <div className="mb-1 flex justify-between font-mono text-[10px] uppercase text-muted-foreground">
-        <span>{label}</span>
-        <span>{right}</span>
+    <div className="w-full min-w-0">
+      <div className="mb-1 flex items-center justify-between gap-2 font-mono text-[10px] uppercase text-muted-foreground">
+        <span className="truncate min-w-0">{label}</span>
+        <span className="shrink-0">{right}</span>
       </div>
       <div className="h-1.5 overflow-hidden rounded-full bg-muted">
         <div className={cn("h-full transition-all duration-300", bar[tone])} style={{ width: `${Math.min(100, Math.max(0, value))}%` }} />
@@ -58,9 +58,11 @@ export function Meter({ value, tone, label, right }: { value: number; tone: Tone
 
 export function SectionTitle({ children, hint }: { children: ReactNode; hint?: ReactNode }) {
   return (
-    <div className="mb-3 flex items-end justify-between gap-2">
-      <h2 className="text-lg font-bold uppercase tracking-wider text-primary glow-text">{children}</h2>
-      {hint && <div className="font-mono text-[11px] text-muted-foreground">{hint}</div>}
+    <div className="mb-3 flex flex-wrap items-baseline justify-between gap-x-2 gap-y-1">
+      <h2 className="text-base sm:text-lg font-bold uppercase tracking-wider text-primary glow-text min-w-0">
+        {children}
+      </h2>
+      {hint && <div className="font-mono text-[10px] sm:text-[11px] text-muted-foreground">{hint}</div>}
     </div>
   );
 }
