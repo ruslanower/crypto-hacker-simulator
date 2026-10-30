@@ -45,7 +45,13 @@ function useNow() {
 
 function Game() {
   const { state, act, offline, dismissOffline, reset } = useGame();
-  const [tab, setTab] = useState<Tab>("terminal");
+  const [tab, setTab] = useState<Tab>(() => {
+    if (typeof window !== "undefined") {
+      const p = new URLSearchParams(window.location.search).get("tab") as Tab;
+      if (p && ["terminal", "shop", "ops", "contracts", "market", "darknet"].includes(p)) return p;
+    }
+    return "terminal";
+  });
   const [hackId, setHackId] = useState<string | null>(null);
   const [audioEnabled, setAudioEnabled] = useState(sound.enabled);
   const [lang, setLangState] = useState<Lang>(getLang);

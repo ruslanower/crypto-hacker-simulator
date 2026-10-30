@@ -38,3 +38,5 @@ flutter_app/.flutter-plugins
 flutter_app/.flutter-plugins-dependencies
 .dart_tool/
 .flutter-plugins-dependencies
+*.apk
+*.aab
