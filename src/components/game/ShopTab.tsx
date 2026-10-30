@@ -100,30 +100,43 @@ export function ShopTab({ s, act, lang }: { s: GameState; act: (fn: (s: GameStat
           const desc = getUpgradeDesc(u, lang);
 
           return (
-            <div key={u.id} className={cn("panel flex items-center gap-2.5 p-2.5 sm:p-3 transition-opacity", locked && "opacity-50")}>
-              <div className={cn("flex size-10 sm:size-12 shrink-0 items-center justify-center rounded-md border", locked ? "border-border text-muted-foreground" : "border-primary/40 bg-primary/10 text-primary")}>
-                {locked ? <Lock className="size-4 sm:size-5" /> : <Icon className="size-5 sm:size-6" />}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-center gap-1.5">
-                  <span className="truncate text-xs sm:text-sm font-bold">{name}</span>
-                  <span className="shrink-0 rounded bg-muted px-1.5 font-mono text-[9px] sm:text-[10px] text-primary font-bold">×{n}</span>
+            <div key={u.id} className={cn("panel p-3 transition-opacity flex flex-col justify-between gap-2.5", locked && "opacity-50")}>
+              <div className="flex items-start gap-2.5 min-w-0">
+                <div className={cn("flex size-10 shrink-0 items-center justify-center rounded-md border mt-0.5", locked ? "border-border text-muted-foreground" : "border-primary/40 bg-primary/10 text-primary")}>
+                  {locked ? <Lock className="size-4" /> : <Icon className="size-5" />}
                 </div>
-                <div className="text-[10px] sm:text-[11px] text-muted-foreground line-clamp-2 leading-tight mt-0.5">
-                  {locked ? t("unlockAtLvl", lang, { lvl: u.levelRequired }) : desc}
-                </div>
-                {!locked && (
-                  <div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 font-mono text-[9px] sm:text-[10px]">
-                    <span className="text-info font-semibold">{currentTab.unit(u.power * milestoneMultiplier(n))}</span>
-                    {u.heatGen ? <span className="text-warning font-semibold">+{u.heatGen}°C/s</span> : null}
-                    <span className="text-muted-foreground">{n}/{nextMilestone} {t("toDoubling", lang)}</span>
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center justify-between gap-1.5">
+                    <span className="truncate text-xs sm:text-sm font-bold text-foreground">{name}</span>
+                    <span className="shrink-0 rounded bg-muted px-1.5 py-0.5 font-mono text-[9px] sm:text-[10px] text-primary font-bold">×{n}</span>
                   </div>
-                )}
+                  <div className="mt-0.5 flex flex-wrap items-center gap-x-2 font-mono text-[9px] sm:text-[10px]">
+                    {!locked ? (
+                      <>
+                        <span className="text-info font-semibold">{currentTab.unit(u.power * milestoneMultiplier(n))}</span>
+                        {u.heatGen ? <span className="text-warning font-semibold">+{u.heatGen}°C/s</span> : null}
+                        <span className="text-muted-foreground">{n}/{nextMilestone} {t("toDoubling", lang)}</span>
+                      </>
+                    ) : (
+                      <span className="text-muted-foreground">{t("unlockAtLvl", lang, { lvl: u.levelRequired })}</span>
+                    )}
+                  </div>
+                </div>
               </div>
-              <GameButton disabled={locked || !afford} onClick={() => onBuy(u.id)} className="shrink-0 flex-col gap-0 px-2.5 py-1.5 min-w-[72px] sm:min-w-20">
-                <span className="text-[8px] sm:text-[9px] opacity-80">{locked ? t("lockedBtn", lang) : t("buyBtn", lang)}</span>
-                <span className="text-[10px] sm:text-xs font-bold leading-tight">{fmt(cost)}</span>
-              </GameButton>
+
+              <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/50">
+                <p className="text-[10px] sm:text-[11px] text-muted-foreground line-clamp-1 flex-1 min-w-0">
+                  {locked ? t("unlockAtLvl", lang, { lvl: u.levelRequired }) : desc}
+                </p>
+                <GameButton
+                  disabled={locked || !afford}
+                  onClick={() => onBuy(u.id)}
+                  className="shrink-0 py-1.5 px-3 min-w-[80px] sm:min-w-24 flex items-center justify-center gap-1.5"
+                >
+                  <span className="text-[9px] opacity-75">{locked ? t("lockedBtn", lang) : t("buyBtn", lang)}</span>
+                  <span className="text-xs font-bold leading-none">{fmt(cost)}</span>
+                </GameButton>
+              </div>
             </div>
           );
         })}

@@ -52,9 +52,9 @@ export const DICT = {
     // Shop Tab
     blackMarketTitle: "Black Market Hardware",
     milestoneHint: "Every 25 owned units doubles output",
-    tabSoftware: "Software · Passive",
-    tabHardware: "Hardware · Tap",
-    tabCooling: "Cooling · Temp",
+    tabSoftware: "Software",
+    tabHardware: "Hardware",
+    tabCooling: "Cooling",
     unitTap: "+{val} to tap power",
     unitSoftware: "+{val}/s passive",
     unitCooling: "−{val}°C/s cooling",
@@ -209,8 +209,8 @@ export const DICT = {
     // Shop Tab
     blackMarketTitle: "Чорний ринок обладнання",
     milestoneHint: "Кожні 25 одиниць одного типу подвоюють віддачу",
-    tabSoftware: "Софт · Пасив",
-    tabHardware: "Залізо · Тап",
+    tabSoftware: "Софт",
+    tabHardware: "Залізо",
     tabCooling: "Охолодження",
     unitTap: "+{val} до сили тапу",
     unitSoftware: "+{val}/с пасив",
