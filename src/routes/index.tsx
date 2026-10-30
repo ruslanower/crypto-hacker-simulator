@@ -156,7 +156,7 @@ function Logo() {
 
 function StatBar({ s }: { s: GameState }) {
   const level = getLevel(s.runEarned);
-  const cur = LEVEL_THRESHOLDS[level - 1];
+  const cur = LEVEL_THRESHOLDS[level - 1] ?? 0;
   const next = LEVEL_THRESHOLDS[level];
   const pct = next ? ((s.runEarned - cur) / (next - cur)) * 100 : 100;
   const throttling = isThrottling(s);
