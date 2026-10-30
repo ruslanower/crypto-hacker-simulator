@@ -1,11 +1,13 @@
 import type { ReactNode } from "react";
 import {
   Atom, Bot, BrainCircuit, Copy, Cpu, Droplets, Fan, Flame, Keyboard, LayoutGrid, Mouse, Network, Scale, Server, Snowflake, Terminal, Waves,
+  Zap, Shield, Globe, Radio, Sparkles, Orbit, Binary, Wifi, Satellite, Gauge, Disc
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export const ICONS: Record<string, typeof Bot> = {
   Atom, Bot, BrainCircuit, Copy, Cpu, Droplets, Fan, Flame, Keyboard, LayoutGrid, Mouse, Network, Scale, Server, Snowflake, Terminal, Waves,
+  Zap, Shield, Globe, Radio, Sparkles, Orbit, Binary, Wifi, Satellite, Gauge, Disc
 };
 
 type Tone = "primary" | "info" | "warning" | "destructive" | "muted";
@@ -27,7 +29,7 @@ export function GameButton({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        "inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-2 font-mono text-xs font-bold uppercase tracking-wide transition-all active:scale-95",
+        "inline-flex items-center justify-center gap-1.5 rounded-md px-3 py-2 font-mono text-xs font-bold uppercase tracking-wide transition-all active:scale-95 select-none",
         disabled ? "cursor-not-allowed border border-border bg-muted text-muted-foreground" : toneBtn[tone],
         className,
       )}

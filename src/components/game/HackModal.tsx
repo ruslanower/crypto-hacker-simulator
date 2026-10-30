@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { Eye, EyeOff, Terminal } from "lucide-react";
 import type { TargetDef } from "@/game/data";
 import { cn } from "@/lib/utils";
+import { sound } from "@/lib/audio";
 
 const OPCODES = ["DE", "AD", "BE", "EF", "CA", "FE", "BA", "13", "37", "8F", "00", "C0", "FF", "EE", "42", "69", "A7", "5C"];
 const MAX_STRIKES = 3;
@@ -32,6 +33,8 @@ export function HackModal({ target, bonusSec, onDone }: { target: TargetDef; bon
   const finish = useCallback((ok: boolean) => {
     if (done.current) return;
     done.current = true;
+    if (ok) sound.playSuccess();
+    else sound.playOverheat();
     onDone(ok);
   }, [onDone]);
 
@@ -58,6 +61,7 @@ export function HackModal({ target, bonusSec, onDone }: { target: TargetDef; bon
   const press = (op: string) => {
     if (preview || done.current) return;
     if (op === data.seq[input]) {
+      sound.playTap(1.3);
       const nextIn = input + 1;
       if (nextIn < data.seq.length) return setInput(nextIn);
       if (round >= target.rounds) return finish(true);
@@ -67,6 +71,7 @@ export function HackModal({ target, bonusSec, onDone }: { target: TargetDef; bon
       setLeft(roundMs);
       setPreview(target.hidden);
     } else {
+      sound.playOverheat();
       const st = strikes + 1;
       setStrikes(st);
       setLeft((l) => Math.max(0, l - 1500));

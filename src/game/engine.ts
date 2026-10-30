@@ -159,12 +159,16 @@ function sumType(s: GameState, type: UpgradeDef["type"]) {
   return total;
 }
 
-export const comboMultiplier = (s: GameState) => 1 + Math.min(s.combo, 50) / 50;
+export const comboMultiplier = (s: GameState) => 1 + Math.min(s.combo, 50) / 40;
+
+export function baseTapPower(s: GameState): number {
+  const base = 1.0 + sumType(s, "hardware");
+  const mul = prestigeMultiplier(s) * (1 + 0.25 * perkLevel(s, "tap")) * (isThrottling(s) ? 0.4 : 1);
+  return base * mul;
+}
 
 export function tapPower(s: GameState): number {
-  const base = 0.5 + sumType(s, "hardware");
-  const mul = prestigeMultiplier(s) * (1 + 0.2 * perkLevel(s, "tap")) * (isThrottling(s) ? 0.4 : 1);
-  return base * mul * comboMultiplier(s);
+  return baseTapPower(s) * comboMultiplier(s);
 }
 
 export function cashPerSecond(s: GameState, ignoreThrottle = false): number {
@@ -172,7 +176,7 @@ export function cashPerSecond(s: GameState, ignoreThrottle = false): number {
   return sumType(s, "software") * mul * (!ignoreThrottle && isThrottling(s) ? 0.4 : 1);
 }
 
-export const coolingPower = (s: GameState) => 0.6 + sumType(s, "cooling");
+export const coolingPower = (s: GameState) => (0.8 + sumType(s, "cooling")) * (1 + 0.2 * perkLevel(s, "cooling"));
 
 export function heatGeneration(s: GameState): number {
   let total = 0;
@@ -252,7 +256,7 @@ export function buyUpgrade(s: GameState, id: string): GameState {
 }
 
 export function purgeFans(s: GameState): GameState {
-  return log({ ...s, temp: Math.max(35, s.temp - 12) }, "[❄] Екстрена продувка: −12°C", "info");
+  return log({ ...s, temp: Math.max(35, s.temp - 18) }, "[❄] Екстрена продувка рідким азотом: −18°C", "info");
 }
 
 export function startHack(s: GameState, id: string, now: number): GameState | null {
@@ -287,15 +291,16 @@ export function resolveHack(s: GameState, id: string, success: boolean, rand: nu
 
 export function wash(s: GameState): GameState {
   if (s.dirty <= 0) return s;
-  const clean = s.dirty * (1 - washFee(s));
+  const fee = washFee(s);
+  const clean = s.dirty * (1 - fee);
   const next: GameState = {
     ...s,
     cash: s.cash + clean,
     dirty: 0,
-    heat: Math.max(0, s.heat - 20),
+    heat: Math.max(0, s.heat - 25),
     stats: { ...s.stats, washed: s.stats.washed + s.dirty, washes: s.stats.washes + 1 },
   };
-  return log(next, `[🌪] Відмито через міксер: +${fmt(clean)} чистих`, "ok");
+  return log(next, `[🌪] Tornado Cash: відмито ${fmt(s.dirty)} → +${fmt(clean)} чистих (комісія ${Math.round(fee * 100)}%, загроза FBI −25%)`, "ok");
 }
 
 export function bribe(s: GameState): GameState {
@@ -470,6 +475,7 @@ function checkAchievements(s: GameState): GameState {
     contract_10: s.stats.contracts >= 10,
     milestone: maxOwned >= MILESTONE_STEP,
     level_10: lvl >= 10,
+    level_15: lvl >= 15,
   };
   let next = s;
   for (const a of ACHIEVEMENTS) {
@@ -497,6 +503,20 @@ export function tick(s: GameState, dtSec: number, now: number, rand: () => numbe
     heat: Math.max(0, next.heat - 0.05 * dtSec),
     combo: now - next.lastTapAt > 1200 ? Math.max(0, next.combo - 20 * dtSec) : next.combo,
   };
+
+  // Hardware burnout check if critical temp >= 94°C without cooling
+  if (next.temp >= 94 && rand() < 0.07 * dtSec) {
+    const hwOwned = UPGRADES.filter((u) => u.type === "hardware" && (next.owned[u.id] ?? 0) > 0);
+    if (hwOwned.length > 0) {
+      const burnt = hwOwned[hwOwned.length - 1];
+      next = {
+        ...next,
+        owned: { ...next.owned, [burnt.id]: next.owned[burnt.id] - 1 },
+        temp: Math.max(70, next.temp - 12),
+      };
+      next = log(next, `[💥] ПЕРЕГРІВ ${next.temp.toFixed(1)}°C! Через брак охолодження згорів 1× «${burnt.name}»!`, "bad");
+    }
+  }
 
   if (next.heat >= 100) next = raid(next);
 

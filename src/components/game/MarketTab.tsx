@@ -2,6 +2,7 @@ import { COINS } from "@/game/data";
 import { buyCoin, fmt, sellCoin, type GameState } from "@/game/engine";
 import { cn } from "@/lib/utils";
 import { GameButton, SectionTitle } from "./ui";
+import { sound } from "@/lib/audio";
 
 function Spark({ data, up }: { data: number[]; up: boolean }) {
   if (data.length < 2) return <div className="h-10" />;
@@ -49,9 +50,37 @@ export function MarketTab({ s, act }: { s: GameState; act: (fn: (s: GameState) =
                 </div>
               )}
               <div className="mt-2 grid grid-cols-3 gap-1.5">
-                <GameButton tone="info" disabled={s.cash < 10} onClick={() => act((st) => buyCoin(st, c.symbol, st.cash * 0.25))}>25%</GameButton>
-                <GameButton tone="info" disabled={s.cash < 10} onClick={() => act((st) => buyCoin(st, c.symbol, st.cash))}>Все</GameButton>
-                <GameButton tone="warning" disabled={!h} onClick={() => act((st) => sellCoin(st, c.symbol))}>Продати</GameButton>
+                <GameButton
+                  tone="info"
+                  disabled={s.cash < 10}
+                  onClick={() => {
+                    sound.playBuy();
+                    act((st) => buyCoin(st, c.symbol, st.cash * 0.25));
+                  }}
+                >
+                  25%
+                </GameButton>
+                <GameButton
+                  tone="info"
+                  disabled={s.cash < 10}
+                  onClick={() => {
+                    sound.playBuy();
+                    act((st) => buyCoin(st, c.symbol, st.cash));
+                  }}
+                >
+                  Все
+                </GameButton>
+                <GameButton
+                  tone="warning"
+                  disabled={!h}
+                  onClick={() => {
+                    if (pnl >= 0) sound.playSuccess();
+                    else sound.playTap(0.8);
+                    act((st) => sellCoin(st, c.symbol));
+                  }}
+                >
+                  Продати
+                </GameButton>
               </div>
             </div>
           );

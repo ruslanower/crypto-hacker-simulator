@@ -3,6 +3,7 @@ import { TARGETS } from "@/game/data";
 import { bribe, bribeCost, fmt, getLevel, hackGasCost, prestigeMultiplier, wash, washFee, type GameState } from "@/game/engine";
 import { cn } from "@/lib/utils";
 import { GameButton, Meter, SectionTitle, formatDuration } from "./ui";
+import { sound } from "@/lib/audio";
 
 export function OpsTab({ s, act, now, onStart }: { s: GameState; act: (fn: (s: GameState) => GameState) => void; now: number; onStart: (id: string) => void }) {
   const level = getLevel(s.runEarned);
@@ -15,16 +16,32 @@ export function OpsTab({ s, act, now, onStart }: { s: GameState; act: (fn: (s: G
         <div className="panel p-3">
           <Meter value={s.heat} tone={s.heat > 75 ? "destructive" : s.heat > 45 ? "warning" : "primary"} label="Загроза кіберполіції" right={`${s.heat.toFixed(0)}%`} />
           <p className="mt-2 text-[11px] text-muted-foreground">На 100% — облава: −70% брудних і −10% чистих грошей.</p>
-          <GameButton tone="destructive" className="mt-2 w-full" disabled={s.cash < bribeCost(s) || s.heat <= 0} onClick={() => act(bribe)}>
+          <GameButton
+            tone="destructive"
+            className="mt-2 w-full"
+            disabled={s.cash < bribeCost(s) || s.heat <= 0}
+            onClick={() => {
+              sound.playTap(0.9);
+              act(bribe);
+            }}
+          >
             <ShieldOff className="size-3.5" /> Замести сліди · {fmt(bribeCost(s))}
           </GameButton>
         </div>
         <div className="panel p-3">
           <div className="font-mono text-[10px] uppercase text-muted-foreground">Брудна крипта</div>
           <div className="text-xl font-bold text-warning">{fmt(s.dirty)}</div>
-          <p className="mt-1 text-[11px] text-muted-foreground">Комісія міксера {Math.round(washFee(s) * 100)}%{s.gas > 150 ? " (дорогий газ!)" : ""}. Відмивання знижує загрозу на 20%.</p>
-          <GameButton tone="warning" className="mt-2 w-full" disabled={s.dirty <= 0} onClick={() => act(wash)}>
-            <Wind className="size-3.5" /> Відмити все
+          <p className="mt-1 text-[11px] text-muted-foreground">Комісія міксера {Math.round(washFee(s) * 100)}%{s.gas > 150 ? " (дорогий газ!)" : ""}. Відмивання знижує загрозу на 25%.</p>
+          <GameButton
+            tone="warning"
+            className="mt-2 w-full"
+            disabled={s.dirty <= 0}
+            onClick={() => {
+              sound.playWash();
+              act(wash);
+            }}
+          >
+            <Wind className="size-3.5" /> Відмити через Tornado Cash
           </GameButton>
         </div>
       </div>

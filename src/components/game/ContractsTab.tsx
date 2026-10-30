@@ -1,6 +1,7 @@
 import { CheckCircle2 } from "lucide-react";
 import { claimContract, contractProgress, fmt, type Contract, type GameState } from "@/game/engine";
 import { GameButton, Meter, SectionTitle, formatDuration } from "./ui";
+import { sound } from "@/lib/audio";
 
 function label(c: Contract) {
   switch (c.kind) {
@@ -29,7 +30,15 @@ export function ContractsTab({ s, act, now }: { s: GameState; act: (fn: (s: Game
               {c.claimed ? (
                 <div className="flex items-center justify-center gap-1.5 py-2 font-mono text-xs text-primary"><CheckCircle2 className="size-4" /> Виконано</div>
               ) : (
-                <GameButton disabled={!done} onClick={() => act((st) => claimContract(st, c.id))}>Забрати</GameButton>
+                <GameButton
+                  disabled={!done}
+                  onClick={() => {
+                    sound.playSuccess();
+                    act((st) => claimContract(st, c.id));
+                  }}
+                >
+                  Забрати
+                </GameButton>
               )}
             </div>
           );
