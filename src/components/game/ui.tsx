@@ -39,7 +39,7 @@ export function GameButton({
   );
 }
 
-export function Meter({ value, tone, label, right }: { value: number; tone: Tone; label: string; right: string }) {
+export function Meter({ value, tone, label, right }: { value: number; tone: Tone; label: ReactNode; right: ReactNode }) {
   const bar: Record<Tone, string> = {
     primary: "bg-primary", info: "bg-info", warning: "bg-warning", destructive: "bg-destructive", muted: "bg-muted-foreground",
   };

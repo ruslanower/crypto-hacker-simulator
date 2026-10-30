@@ -68,50 +68,6 @@ export function DarknetTab({
         </div>
       </div>
 
-      {/* 15 Hacker Ranks & Slang Hierarchy */}
-      <div>
-        <SectionTitle hint={`${t("rankPrefix", lang)} ${currentLvl}/15`}>
-          {t("ranksTitle", lang)}
-        </SectionTitle>
-        <p className="text-xs text-muted-foreground mb-3">{t("ranksSubtitle", lang)}</p>
-        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3 max-h-96 overflow-y-auto p-1">
-          {LEVEL_THRESHOLDS.map((thresh, idx) => {
-            const lvl = idx + 1;
-            const isUnlocked = currentLvl >= lvl;
-            const isCurrent = currentLvl === lvl;
-            const title = getLevelTitle(lvl, lang);
-            const desc = getLevelDesc(lvl, lang);
-
-            return (
-              <div
-                key={lvl}
-                className={cn(
-                  "panel p-3 flex flex-col justify-between text-xs transition-colors",
-                  isCurrent ? "border-primary bg-primary/10 glow-box" : isUnlocked ? "border-border/80" : "opacity-40 border-dashed"
-                )}
-              >
-                <div>
-                  <div className="flex items-center justify-between font-mono mb-1">
-                    <span className="font-bold flex items-center gap-1.5">
-                      {isCurrent ? <Sparkles className="size-3.5 text-primary" /> : isUnlocked ? <CheckCircle2 className="size-3.5 text-info" /> : <Lock className="size-3.5 text-muted-foreground" />}
-                      {t("rankPrefix", lang)} {lvl}
-                    </span>
-                    <span className="text-muted-foreground">{fmt(thresh)}</span>
-                  </div>
-                  <div className="font-bold text-sm text-foreground">{title}</div>
-                  <div className="text-[11px] text-muted-foreground mt-1 leading-snug">{desc}</div>
-                </div>
-                {isCurrent && (
-                  <div className="mt-2 text-[10px] font-mono text-primary font-bold uppercase tracking-wider">
-                    {t("currentRankBadge", lang)}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      </div>
-
       {/* Darknet Perks */}
       <div>
         <SectionTitle>{t("perksTitle", lang)}</SectionTitle>
@@ -168,6 +124,50 @@ export function DarknetTab({
                   <div className="text-[11px] text-muted-foreground">{desc}</div>
                 </div>
                 {a.reward > 0 && <span className="font-mono text-[10px] text-warning font-bold">+{a.reward} rep</span>}
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 15 Hacker Ranks & Slang Hierarchy (Moved to bottom of the list) */}
+      <div>
+        <SectionTitle hint={`${t("rankPrefix", lang)} ${currentLvl}/15`}>
+          {t("ranksTitle", lang)}
+        </SectionTitle>
+        <p className="text-xs text-muted-foreground mb-3">{t("ranksSubtitle", lang)}</p>
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+          {LEVEL_THRESHOLDS.map((thresh, idx) => {
+            const lvl = idx + 1;
+            const isUnlocked = currentLvl >= lvl;
+            const isCurrent = currentLvl === lvl;
+            const title = getLevelTitle(lvl, lang);
+            const desc = getLevelDesc(lvl, lang);
+
+            return (
+              <div
+                key={lvl}
+                className={cn(
+                  "panel p-3 flex flex-col justify-between text-xs transition-colors",
+                  isCurrent ? "border-primary bg-primary/10 glow-box" : isUnlocked ? "border-border/80" : "opacity-40 border-dashed"
+                )}
+              >
+                <div>
+                  <div className="flex items-center justify-between font-mono mb-1">
+                    <span className="font-bold flex items-center gap-1.5">
+                      {isCurrent ? <Sparkles className="size-3.5 text-primary" /> : isUnlocked ? <CheckCircle2 className="size-3.5 text-info" /> : <Lock className="size-3.5 text-muted-foreground" />}
+                      {t("rankPrefix", lang)} {lvl}
+                    </span>
+                    <span className="text-muted-foreground">{fmt(thresh)}</span>
+                  </div>
+                  <div className="font-bold text-sm text-foreground">{title}</div>
+                  <div className="text-[11px] text-muted-foreground mt-1 leading-snug">{desc}</div>
+                </div>
+                {isCurrent && (
+                  <div className="mt-2 text-[10px] font-mono text-primary font-bold uppercase tracking-wider">
+                    {t("currentRankBadge", lang)}
+                  </div>
+                )}
               </div>
             );
           })}

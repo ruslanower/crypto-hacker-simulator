@@ -260,7 +260,7 @@ function StatBar({ s, lang }: { s: GameState; lang: Lang }) {
   const rankTitle = getLevelTitle(level, lang);
 
   return (
-    <div className="panel mx-4 mt-4 grid gap-3 p-4 lg:mx-0 lg:mt-0">
+    <div className="panel mx-4 mt-2 grid gap-2.5 p-3 sm:p-4 lg:mx-0 lg:mt-0">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <div className="font-mono text-[10px] uppercase text-muted-foreground">{t("cleanBalance", lang)}</div>
@@ -288,11 +288,16 @@ function StatBar({ s, lang }: { s: GameState; lang: Lang }) {
         </div>
       </div>
 
-      <div className="grid gap-3 sm:grid-cols-2">
+      <div className="grid gap-2.5 sm:grid-cols-2">
         <Meter
           value={pct}
           tone="primary"
-          label={`${t("rankPrefix", lang)} ${level}/15: ${rankTitle}`}
+          label={
+            <span className="flex items-center gap-1 truncate max-w-[190px]">
+              <span>{t("rankPrefix", lang)} {level}/15</span>
+              <span className="hidden sm:inline opacity-75">· {rankTitle}</span>
+            </span>
+          }
           right={next ? `${fmt(s.runEarned)} / ${fmt(next)}` : t("maxLevel", lang)}
         />
         <Meter
