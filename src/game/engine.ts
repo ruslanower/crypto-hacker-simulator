@@ -142,7 +142,7 @@ export function milestoneMultiplier(count: number): number {
 
 export function getLevel(runEarned: number): number {
   let lvl = 1;
-  for (let i = 0; i < LEVEL_THRESHOLDS.length; i++) if (runEarned >= LEVEL_THRESHOLDS[i]) lvl = i + 1;
+  for (let i = 0; i < LEVEL_THRESHOLDS.length; i++) if (runEarned >= (LEVEL_THRESHOLDS[i] ?? Infinity)) lvl = i + 1;
   return lvl;
 }
 

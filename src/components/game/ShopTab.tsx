@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Lock, Snowflake } from "lucide-react";
+import { Bot, Lock, Snowflake } from "lucide-react";
 import { MILESTONE_STEP, UPGRADES, type UpgradeType } from "@/game/data";
 import {
   buyUpgrade, coolingPower, fmt, getLevel, heatGeneration, milestoneMultiplier, ownedCount, purgeFans, upgradeCost, type GameState,
@@ -62,7 +62,7 @@ export function ShopTab({ s, act }: { s: GameState; act: (fn: (s: GameState) => 
           const cost = upgradeCost(u, n);
           const locked = level < u.levelRequired;
           const afford = s.cash >= cost;
-          const Icon = ICONS[u.icon] ?? ICONS.Bot;
+          const Icon = ICONS[u.icon] ?? Bot;
           const nextMilestone = (Math.floor(n / MILESTONE_STEP) + 1) * MILESTONE_STEP;
           return (
             <div key={u.id} className={cn("panel flex gap-3 p-3", locked && "opacity-50")}>
