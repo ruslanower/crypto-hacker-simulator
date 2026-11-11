@@ -34,6 +34,13 @@ class GameState extends ChangeNotifier {
   DateTime _lastSaveTime = DateTime.now();
   DateTime _lastTickTime = DateTime.now();
   int _crisisCheckTicks = 0;
+  double _crisisTickAccumulator = 0.0;
+
+  void _safeHaptic(VoidCallback action) {
+    try {
+      action();
+    } catch (_) {}
+  }
 
   // Terminal Log Stream
   final List<String> _terminalLogs = [
@@ -190,7 +197,7 @@ class GameState extends ChangeNotifier {
     // Tapping generates a tiny amount of CPU heat
     _hardwareTemperature = min(105.0, _hardwareTemperature + 0.04);
 
-    HapticFeedback.lightImpact();
+    _safeHaptic(() => HapticFeedback.lightImpact());
 
     if (_tapsCount % 7 == 0) {
       _addRandomTerminalLog(reward);
@@ -229,7 +236,7 @@ class GameState extends ChangeNotifier {
     if (_cash >= cost) {
       _cash -= cost;
       up.count++;
-      HapticFeedback.mediumImpact();
+      _safeHaptic(() => HapticFeedback.mediumImpact());
       _pushTerminalLog('[+] Апгрейд придбано: ${up.name} x${up.count}');
       _checkAchievements();
       notifyListeners();
@@ -242,7 +249,7 @@ class GameState extends ChangeNotifier {
   void purgeCoolingFans() {
     _hardwareTemperature = max(35.0, _hardwareTemperature - 18.0);
     _pushTerminalLog('❄️ ЕКСТРЕНА ПРОДУВКА: Кулери на 100%! Температуру знижено на -18°C!');
-    HapticFeedback.mediumImpact();
+    _safeHaptic(() => HapticFeedback.mediumImpact());
     notifyListeners();
   }
 
@@ -279,12 +286,12 @@ class GameState extends ChangeNotifier {
       target.isCompletedOnce = true;
 
       _pushTerminalLog('🔥 УСПІХ ХАКУ! [${target.title}] приніс +\$${loot.toStringAsFixed(0)} (Брудна крипта)');
-      HapticFeedback.heavyImpact();
+      _safeHaptic(() => HapticFeedback.heavyImpact());
     } else {
       // FAILED - caught by WAF / honeypot!
       _heat = min(100.0, _heat + (target.heatGenerated * 1.5));
       _pushTerminalLog('❌ ПРОВАЛ АТАКИ! [${target.title}] заблоковано фаєрволом! Загроза різко зросла!');
-      HapticFeedback.vibrate();
+      _safeHaptic(() => HapticFeedback.vibrate());
     }
 
     _checkRaidCondition();
@@ -307,7 +314,7 @@ class GameState extends ChangeNotifier {
     _heat = max(0.0, _heat - max(5.0, heatReduction));
 
     _pushTerminalLog('🌪️ Відмито \$${amount.toStringAsFixed(0)} через Tornado Cash. Отримано \$${cleanReceived.toStringAsFixed(0)}. Рівень загрози знижено!');
-    HapticFeedback.mediumImpact();
+    _safeHaptic(() => HapticFeedback.mediumImpact());
     notifyListeners();
     return true;
   }
@@ -319,7 +326,7 @@ class GameState extends ChangeNotifier {
       _cash -= cost;
       _heat = max(0.0, _heat - 35.0);
       _pushTerminalLog('🛡️ Знищено робочі пристрої, змінено IP/MAC. Рівень загрози впав на -35%!');
-      HapticFeedback.mediumImpact();
+      _safeHaptic(() => HapticFeedback.mediumImpact());
       notifyListeners();
       return true;
     }
@@ -346,7 +353,7 @@ class GameState extends ChangeNotifier {
       _pushTerminalLog('⚡ ПЕРЕМКНУТО НА L2 ARBITRUM! Комісії впали до норми!');
     }
 
-    HapticFeedback.heavyImpact();
+    _safeHaptic(() => HapticFeedback.heavyImpact());
     notifyListeners();
   }
 
@@ -369,7 +376,7 @@ class GameState extends ChangeNotifier {
       _pushTerminalLog('🚨 МЕРЕЖА ПЕРЕВАНТАЖЕНА! Комісії Gwei зашкалюють!');
     }
 
-    HapticFeedback.vibrate();
+    _safeHaptic(() => HapticFeedback.vibrate());
     notifyListeners();
   }
 
@@ -382,7 +389,7 @@ class GameState extends ChangeNotifier {
       _heat = 25.0; // Cools down after raid
       _lastRaidMessage = 'ОБЛАВА КІБЕРПОЛІЦІЇ! Ваші невідмиті адреси заморожено емітентами Tether та CEX. Втрачено \$${lostCash.toStringAsFixed(0)} брудних коштів!';
       _pushTerminalLog('🚨🚨🚨 $_lastRaidMessage');
-      HapticFeedback.vibrate();
+      _safeHaptic(() => HapticFeedback.vibrate());
     }
   }
 
@@ -421,7 +428,7 @@ class GameState extends ChangeNotifier {
   // --- GAME LOOP & TICKS ---
 
   void _startGameLoop() {
-    _gameLoopTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+    _gameLoopTimer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
       final now = DateTime.now();
       final deltaSeconds = now.difference(_lastTickTime).inMilliseconds / 1000.0;
       _lastTickTime = now;
@@ -451,18 +458,22 @@ class GameState extends ChangeNotifier {
 
       // Crisis timer handling
       if (_currentCrisis != null) {
-        // Every 1s
-        if (now.millisecond < 120) {
-          _currentCrisis!.remainingSeconds -= 1;
+        _crisisTickAccumulator += deltaSeconds;
+        if (_crisisTickAccumulator >= 1.0) {
+          final toDeduct = _crisisTickAccumulator.floor();
+          _crisisTickAccumulator -= toDeduct;
+          _currentCrisis!.remainingSeconds -= toDeduct;
           if (_currentCrisis!.remainingSeconds <= 0) {
             _failCrisis(_currentCrisis!);
           }
         }
+      } else {
+        _crisisTickAccumulator = 0.0;
       }
 
-      // Crisis random spawn check every ~10s
+      // Crisis random spawn check every ~10s (20 * 500ms)
       _crisisCheckTicks++;
-      if (_crisisCheckTicks >= 100) {
+      if (_crisisCheckTicks >= 20) {
         _crisisCheckTicks = 0;
         _checkRandomCrisisSpawn();
       }
@@ -515,7 +526,7 @@ class GameState extends ChangeNotifier {
           actionButtonText: 'ЗАКРИТИ БЕКДОР',
         );
       }
-      HapticFeedback.vibrate();
+      _safeHaptic(() => HapticFeedback.vibrate());
       _pushTerminalLog('⚠️ УВАГА: ${_currentCrisis!.title}');
     }
   }
@@ -835,7 +846,7 @@ class GameState extends ChangeNotifier {
     ach.isUnlocked = true;
     _darknetCredibility += ach.rewardPrestige;
     _pushTerminalLog('🏆 ДОСЯГНЕННЯ РОЗБЛОКОВАНО: [${ach.title}] (+${ach.rewardPrestige.toInt()} Credibility)');
-    HapticFeedback.heavyImpact();
+    _safeHaptic(() => HapticFeedback.heavyImpact());
   }
 
   // --- SAVE / LOAD SYSTEM ---
@@ -873,7 +884,9 @@ class GameState extends ChangeNotifier {
         }
       }
 
-      notifyListeners();
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifyListeners();
+      });
     } catch (e) {
       debugPrint('Error loading game state: $e');
     }

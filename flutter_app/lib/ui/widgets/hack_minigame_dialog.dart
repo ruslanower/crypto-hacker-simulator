@@ -77,12 +77,18 @@ class _HackMinigameDialogState extends State<HackMinigameDialog> {
     });
   }
 
+  void _safeHaptic(VoidCallback action) {
+    try {
+      action();
+    } catch (_) {}
+  }
+
   void _onButtonTap(String code) {
     if (_remainingMs <= 0) return;
 
     final nextExpected = _targetSequence[_currentInput.length];
     if (code == nextExpected) {
-      HapticFeedback.lightImpact();
+      _safeHaptic(() => HapticFeedback.lightImpact());
       setState(() {
         _currentInput.add(code);
       });
@@ -90,12 +96,12 @@ class _HackMinigameDialogState extends State<HackMinigameDialog> {
       if (_currentInput.length == _targetSequence.length) {
         // SOLVED!
         _timer?.cancel();
-        HapticFeedback.heavyImpact();
+        _safeHaptic(() => HapticFeedback.heavyImpact());
         _finish(true);
       }
     } else {
       // MISTAKE
-      HapticFeedback.vibrate();
+      _safeHaptic(() => HapticFeedback.vibrate());
       setState(() {
         _strikes++;
         _remainingMs = max(0, _remainingMs - 1200); // Penalty: -1.2 sec

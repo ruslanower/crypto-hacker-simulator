@@ -1,5 +1,7 @@
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'providers/game_state.dart';
 import 'ui/theme/hacker_theme.dart';
@@ -12,6 +14,22 @@ import 'ui/screens/market_screen.dart';
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
+
+  // Prevent runtime HTTP font fetching failures in restricted / offline test environments
+  GoogleFonts.config.allowRuntimeFetching = false;
+
+  // Global Flutter error boundary
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    debugPrint('[FLUTTER_ERROR] ${details.exception}');
+  };
+
+  // Prevent process death from unhandled async platform or timer exceptions
+  PlatformDispatcher.instance.onError = (Object error, StackTrace stack) {
+    debugPrint('[ASYNC_ERROR_HANDLED] $error');
+    return true; // Prevents crash!
+  };
+
   SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,

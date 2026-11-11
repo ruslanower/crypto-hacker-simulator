@@ -18,6 +18,8 @@ class HackerTheme {
       brightness: Brightness.dark,
       scaffoldBackgroundColor: background,
       primaryColor: neonGreen,
+      fontFamily: 'monospace',
+      fontFamilyFallback: const ['RobotoMono', 'DroidSansMono', 'Courier', 'monospace'],
       colorScheme: const ColorScheme.dark(
         primary: neonGreen,
         secondary: neonCyan,
@@ -29,6 +31,7 @@ class HackerTheme {
       ).apply(
         bodyColor: textWhite,
         displayColor: neonGreen,
+        fontFamily: 'monospace',
       ),
       appBarTheme: AppBarTheme(
         backgroundColor: background,
