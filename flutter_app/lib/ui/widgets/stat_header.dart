@@ -79,23 +79,28 @@ class StatHeader extends StatelessWidget {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                        decoration: BoxDecoration(
-                          color: HackerTheme.neonGreen.withOpacity(0.12),
-                          borderRadius: BorderRadius.circular(4),
-                          border: Border.all(color: HackerTheme.neonGreen.withOpacity(0.3)),
-                        ),
-                        child: Text(
-                          'LVL ${state.playerLevel} • ${state.playerLevelTitle.toUpperCase()}',
-                          style: const TextStyle(
-                            color: HackerTheme.neonGreen,
-                            fontSize: 10,
-                            fontWeight: FontWeight.bold,
-                            letterSpacing: 0.8,
+                      Flexible(
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: HackerTheme.neonGreen.withOpacity(0.12),
+                            borderRadius: BorderRadius.circular(4),
+                            border: Border.all(color: HackerTheme.neonGreen.withOpacity(0.3)),
+                          ),
+                          child: Text(
+                            'LVL ${state.playerLevel} • ${state.playerLevelTitle.toUpperCase()}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: const TextStyle(
+                              color: HackerTheme.neonGreen,
+                              fontSize: 10,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.8,
+                            ),
                           ),
                         ),
                       ),
+                      const SizedBox(width: 6),
                       Row(
                         children: [
                           // Gas Indicator
@@ -247,7 +252,7 @@ class StatHeader extends StatelessWidget {
                               ),
                               const SizedBox(width: 2),
                               Text(
-                                '${temp.toStringAsFixed(1)}°C${isOverheating ? ' (ТРОТЛІНГ -60%)' : ''}',
+                                '${temp.toStringAsFixed(1)}°C${isOverheating ? ' (-60%)' : ''}',
                                 style: TextStyle(
                                   color: isOverheating ? HackerTheme.neonRed : HackerTheme.textWhite,
                                   fontSize: 10,

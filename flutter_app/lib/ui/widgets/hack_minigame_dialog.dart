@@ -151,25 +151,32 @@ class _HackMinigameDialogState extends State<HackMinigameDialog> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Row(
-                  children: [
-                    Icon(
-                      Icons.terminal,
-                      color: isCriticalTime ? HackerTheme.neonRed : HackerTheme.neonCyan,
-                      size: 20,
-                    ),
-                    const SizedBox(width: 8),
-                    const Text(
-                      "ІН'ЄКЦІЯ ШЕЛЛКОДУ",
-                      style: TextStyle(
-                        color: HackerTheme.neonCyan,
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.0,
+                Flexible(
+                  child: Row(
+                    children: [
+                      Icon(
+                        Icons.terminal,
+                        color: isCriticalTime ? HackerTheme.neonRed : HackerTheme.neonCyan,
+                        size: 20,
                       ),
-                    ),
-                  ],
+                      const SizedBox(width: 8),
+                      const Flexible(
+                        child: Text(
+                          "ІН'ЄКЦІЯ ШЕЛЛКОДУ",
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: TextStyle(
+                            color: HackerTheme.neonCyan,
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.0,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
+                const SizedBox(width: 6),
                 Text(
                   'ПОМИЛКИ: $_strikes/$_maxStrikes',
                   style: TextStyle(

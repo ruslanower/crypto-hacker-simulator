@@ -31,6 +31,7 @@ class GameState extends ChangeNotifier {
   // Stats
   int _tapsCount = 0;
   int _hacksCount = 0;
+  bool _hasWashedOnce = false;
   DateTime _lastSaveTime = DateTime.now();
   DateTime _lastTickTime = DateTime.now();
   int _crisisCheckTicks = 0;
@@ -314,7 +315,9 @@ class GameState extends ChangeNotifier {
     _heat = max(0.0, _heat - max(5.0, heatReduction));
 
     _pushTerminalLog('🌪️ Відмито \$${amount.toStringAsFixed(0)} через Tornado Cash. Отримано \$${cleanReceived.toStringAsFixed(0)}. Рівень загрози знижено!');
+    _hasWashedOnce = true;
     _safeHaptic(() => HapticFeedback.mediumImpact());
+    _checkAchievements();
     notifyListeners();
     return true;
   }
@@ -828,7 +831,7 @@ class GameState extends ChangeNotifier {
       } else if (ach.id == 'ach_cryptojacker') {
         final bnet = _upgrades.firstWhere((u) => u.id == 'cryptojacking_botnet');
         if (bnet.count >= 1) _unlockAchievement(ach);
-      } else if (ach.id == 'ach_first_wash' && _cash >= 500 && _dirtyCash > 0) {
+      } else if (ach.id == 'ach_first_wash' && _hasWashedOnce) {
         _unlockAchievement(ach);
       } else if (ach.id == 'ach_flash_master') {
         final fl = _upgrades.firstWhere((u) => u.id == 'flash_loan_scanner');
@@ -862,9 +865,14 @@ class GameState extends ChangeNotifier {
       _hardwareTemperature = prefs.getDouble('hardwareTemperature') ?? 40.0;
       _tapsCount = prefs.getInt('tapsCount') ?? 0;
       _hacksCount = prefs.getInt('hacksCount') ?? 0;
+      _hasWashedOnce = prefs.getBool('hasWashedOnce') ?? false;
 
       for (var up in _upgrades) {
         up.count = prefs.getInt('upgrade_${up.id}') ?? 0;
+      }
+
+      for (var t in _targets) {
+        t.isCompletedOnce = prefs.getBool('target_${t.id}') ?? false;
       }
 
       for (var ach in _achievements) {
@@ -903,10 +911,14 @@ class GameState extends ChangeNotifier {
       await prefs.setDouble('hardwareTemperature', _hardwareTemperature);
       await prefs.setInt('tapsCount', _tapsCount);
       await prefs.setInt('hacksCount', _hacksCount);
+      await prefs.setBool('hasWashedOnce', _hasWashedOnce);
       await prefs.setInt('lastSavedEpoch', DateTime.now().millisecondsSinceEpoch);
 
       for (var up in _upgrades) {
         await prefs.setInt('upgrade_${up.id}', up.count);
+      }
+      for (var t in _targets) {
+        await prefs.setBool('target_${t.id}', t.isCompletedOnce);
       }
       for (var ach in _achievements) {
         await prefs.setBool('ach_${ach.id}', ach.isUnlocked);

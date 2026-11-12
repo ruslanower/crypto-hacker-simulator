@@ -36,24 +36,31 @@ class HardwareShopScreen extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      Icon(
-                        Icons.thermostat,
-                        color: isThrottling ? HackerTheme.neonRed : HackerTheme.neonCyan,
-                        size: 20,
-                      ),
-                      const SizedBox(width: 8),
-                      Text(
-                        'ТЕМПЕРАТУРА ФЕРМ: ${temp.toStringAsFixed(1)}°C',
-                        style: TextStyle(
-                          color: isThrottling ? HackerTheme.neonRed : HackerTheme.textWhite,
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
+                  Expanded(
+                    child: Row(
+                      children: [
+                        Icon(
+                          Icons.thermostat,
+                          color: isThrottling ? HackerTheme.neonRed : HackerTheme.neonCyan,
+                          size: 20,
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 8),
+                        Flexible(
+                          child: Text(
+                            'ТЕМПЕРАТУРА ФЕРМ: ${temp.toStringAsFixed(1)}°C',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: isThrottling ? HackerTheme.neonRed : HackerTheme.textWhite,
+                              fontSize: 12,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
+                  const SizedBox(width: 6),
                   Text(
                     'Охолодження: -${state.totalCoolingPower.toStringAsFixed(1)}°C/s',
                     style: const TextStyle(color: HackerTheme.neonCyan, fontSize: 10, fontWeight: FontWeight.bold),
